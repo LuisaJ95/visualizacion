@@ -1,61 +1,71 @@
 import streamlit as st
+from streamlit import session_state
 
-class StreamlitApp:
+
+class Dashboard:
     def __init__(self):
-        self.reset_page()
-    
-    def reset_page(self):
-        self.show_form1 = False
-        self.show_form2 = False
-        self.numbers_form1 = [0, 0, 0, 0]
-        self.numbers_form2 = [0, 0, 0, 0]
-    
-    def run(self):
-        st.title("Página Principal")
-        
-        # Barra lateral
-        st.sidebar.title("Panel de Opciones")
-        
-        # Checkbox para mostrar/ocultar formulario 1
-        self.show_form1 = st.sidebar.checkbox("Mostrar Formulario 1", value=self.show_form1)
-        
-        # Checkbox para mostrar/ocultar formulario 2
-        self.show_form2 = st.sidebar.checkbox("Mostrar Formulario 2", value=self.show_form2)
-        
-        # Botón para restablecer la página
-        if st.sidebar.button("Restablecer Página"):
-            self.reset_page()
-        
-        if self.show_form1:
-            self.show_form1_inputs()
-        
-        if self.show_form2:
-            self.show_form2_inputs()
-        
-        if st.sidebar.button("Generar Resultados"):
-            suma_result = [
-                self.numbers_form1[i] + self.numbers_form2[i] for i in range(4)
-            ]
-            multiplicacion_result = [
-                self.numbers_form1[i] * self.numbers_form2[i] for i in range(4)
-            ]
-            
-            st.title("Resultados")
-            st.write("Resultado de la suma:", suma_result)
-            st.write("Resultado de la multiplicación:", multiplicacion_result)
-    
-    def show_form1_inputs(self):
+        self.reset()
+
+    def reset(self):
+        self.form1_data = {"nombre": "", "edad": 0}
+        self.form2_data = {"email": "", "telefono": ""}
+        self.form3_data = {"pregunta": ""}
+
+    def show_menu(self):
+        st.sidebar.title("Secciones")
+        options = ["Inicio", "Formulario 1", "Formulario 2", "Formulario 3"]
+        if "choice" not in session_state:
+            session_state.choice = "Inicio"
+        choice = st.sidebar.selectbox(
+            "Selecciona una sección", options, options.index(session_state.choice)
+        )
+        session_state.choice = choice
+
+        if choice == "Inicio":
+            self.show_inicio()
+        elif choice == "Formulario 1":
+            self.show_formulario_1()
+        elif choice == "Formulario 2":
+            self.show_formulario_2()
+        elif choice == "Formulario 3":
+            self.show_formulario_3()
+
+        if st.sidebar.button("Restablecer"):
+            self.reset()
+            session_state.choice = "Inicio"
+
+    def show_inicio(self):
+        st.title("Página de inicio")
+        st.write("¡Bienvenido a la página de inicio!")
+
+    def show_formulario_1(self):
         st.title("Formulario 1")
-        for i in range(4):
-            self.numbers_form1[i] = st.number_input(f"Número {i+1}", value=self.numbers_form1[i], key=f"form1-{i}")
-    
-    def show_form2_inputs(self):
+        nombre = st.text_input("Nombre", self.form1_data["nombre"])
+        edad = st.number_input(
+            "Edad", min_value=0, max_value=100, value=self.form1_data["edad"]
+        )
+        if st.button("Enviar"):
+            self.form1_data = {"nombre": nombre, "edad": edad}
+            st.success("Formulario 1 enviado")
+
+    def show_formulario_2(self):
         st.title("Formulario 2")
-        for i in range(4):
-            self.numbers_form2[i] = st.number_input(f"Número {i+1}", value=self.numbers_form2[i], key=f"form2-{i}")
+        email = st.text_input("Email", self.form2_data["email"])
+        telefono = st.text_input("Teléfono", self.form2_data["telefono"])
+        if st.button("Enviar"):
+            self.form2_data = {"email": email, "telefono": telefono}
+            st.success("Formulario 2 enviado")
 
-# Crear una instancia de la clase StreamlitApp
-app = StreamlitApp()
+    def show_formulario_3(self):
+        st.title("Formulario 3")
+        pregunta = st.text_area("Pregunta", self.form3_data["pregunta"])
+        if st.button("Enviar"):
+            self.form3_data = {"pregunta": pregunta}
+            st.success("Formulario 3 enviado")
 
-# Ejecutar la aplicación
-app.run()
+
+dashboard = Dashboard()
+
+if __name__ == "__main__":
+    dashboard.show_menu()
+
